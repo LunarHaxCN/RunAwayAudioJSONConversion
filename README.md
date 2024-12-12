@@ -1,2 +1,51 @@
-# RunAwayAudioJSONConversion
-跑路科技音频Json互转Public
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Replace Example</title>
+</head>
+<body>
+    <input type="file" id="jsonFileInput">
+    <button onclick="readAndReplace()">处理 JSON 文件</button>
+    <script>
+        function readAndReplace() {
+            const fileInput = document.getElementById('jsonFileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请先选择一个 JSON 文件。');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                let data = JSON.parse(e.target.result);
+                function replaceSoundValues(obj) {
+                    if (typeof obj === 'object' && obj!== null) {
+                        for (let key in obj) {
+                            if (obj[key] && typeof obj[key] === 'object') {
+                                replaceSoundValues(obj[key]);
+                            } else if (obj[key] === "item.use.on") {
+                                obj[key] = 0;
+                            } else if (obj[key] === 0) {
+                                obj[key] = "item.use.on";
+                            } else if (obj[key] === "note") {
+                                obj[key] = 81;
+                            } else if (obj[key] === 81) {
+                                obj[key] = "note";
+                            }
+                        }
+                    }
+                }
+                replaceSoundValues(data);
+                const processedData = JSON.stringify(data);
+                const blob = new Blob([processedData], { type: 'application/json' });
+                const fileName = file.name.split('.')[0] + '-Lunar.json';
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = fileName;
+                downloadLink.click();
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
